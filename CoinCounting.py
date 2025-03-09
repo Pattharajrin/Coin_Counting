@@ -47,6 +47,7 @@ def apply_watershed(mask, original_image):
 # ฟังก์ชันตรวจจับวงรีในเหรียญ
 def detect_ellipses(markers, mask, original_image, color):
     count = 0
+    index = 1  # 🔄 ตัวนับหมายเลขวงกลม
     for marker in np.unique(markers):
         if marker == 0 or marker == 1:
             continue  # ข้ามพื้นหลังและขอบที่ไม่ต้องการ
@@ -68,8 +69,15 @@ def detect_ellipses(markers, mask, original_image, color):
 
                 if 0.01 < aspect_ratio < 10 and solidity > 0.01 and arc_len < 500:
                     cv2.ellipse(original_image, ellipse, color, 2)
+                    
+                    # 🔄 วาดหมายเลขที่ศูนย์กลางวงรี
+                    center = (int(ellipse[0][0]), int(ellipse[0][1]))
+                    cv2.putText(original_image, str(index), center, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                    index += 1  # 🔄 เพิ่มตัวนับหมายเลข
+                    
                     count += 1
     return count
+
 
 # ฟังก์ชันตรวจจับเหรียญสีเหลือง
 def detect_yellow_coins(hsv, original_image):
@@ -111,8 +119,8 @@ def coinCounting(filename):
     cv2.putText(im, f"[Yellow: {yellow_count}, Blue: {blue_count}]", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     cv2.imshow('Result Image', im)
-    #cv2.imshow('Yellow Mask', mask_yellow)
-    cv2.imshow('Blue Mask', mask_blue)
+    cv2.imshow('Yellow Mask', mask_yellow)
+    #cv2.imshow('Blue Mask', mask_blue)
     cv2.waitKey(0)
     
     return [yellow_count, blue_count]
